@@ -1,0 +1,7 @@
+{"name": "footprint-downloader",
+ "description": "A footprint and symbols downloader for KiCAD",
+ "version": "0.1",
+ "background": {"scripts": ["bg.js"], "persistent": false},
+ "options_page": "options.html",
+ "permissions": ["downloads"],
+ "manifest_version": 2}
