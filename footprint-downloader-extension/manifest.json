@@ -3,5 +3,5 @@
  "version": "0.1",
  "background": {"scripts": ["bg.js"], "persistent": false},
  "options_page": "options.html",
- "permissions": ["downloads"],
+ "permissions": ["downloads", "tabs"],
  "manifest_version": 2}
