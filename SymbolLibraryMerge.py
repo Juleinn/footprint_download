@@ -8,6 +8,9 @@
 # libraries are quite small files
 # also avoids licensing issues (no dep management inside KiCad)
 import shutil
+import tempfile
+import zipfile
+import os
 
 def parse_recursive(flat):
     ret = []
@@ -61,7 +64,54 @@ def merge_symbol_libraries(destination_filename, source_filename):
         destination_file.write(destination_data)
         destination_file.truncate()
 
+# this will break at some point, when directory structure changes
+def extract_archive_mouser(zip_filename):
+    temp_dir = tempfile.mkdtemp()
+    with zipfile.ZipFile(zip_filename, 'r') as zip_ref:
+        zip_ref.extractall(temp_dir)
+        # find out the folders
+        directories = next(os.walk(temp_dir))[1]
+        if len(directories) != 1:
+            print("Incorrect archive format")
+            return None
+        
+        device_subdir = temp_dir + "/" + directories[0]
+        # walk the subdir, we should have KiCad subdir and optionnaly 3D
+        cads_subdirs = next(os.walk(device_subdir))[1]
+        # find Kicad files
+        if not "KiCad" in cads_subdirs:
+            print("Kicad not found")
+            return None
+        
+        kicad_subdir = device_subdir + "/KiCad"
+        # looking for a .kicad_sym file
+        kicad_files = next(os.walk(kicad_subdir))[2]
+        symbol_libs = list(filter(lambda x: ".kicad_sym" in x, kicad_files))
+        footprints = list(filter(lambda x: ".kicad_mod" in x, kicad_files))
+
+        if len(symbol_libs) != 1 or len(footprints) != 1:
+            print("Multiple symbol/footprints libs found. Cannot choose.")
+            return None
+        
+        symbol_lib = kicad_subdir + '/' + symbol_libs[0]
+        footprint = kicad_subdir + '/' + footprints[0]
+
+        if not "3D" in cads_subdirs:
+            print("No 3D file found. Returning symbol/footprint")
+            return (symbol_lib, footprint, "")
+        
+        subdir_3d = device_subdir + '/3D'  
+        files_3d = next(os.walk(subdir_3d))[2]
+        if len(files_3d) == 0:
+            print("No 3D file found. Returning symbol/footprint")
+            return (symbol_lib, footprint, "")
+        
+        # TODO manage multi format here, wrl preferred over stp
+        file_3d = subdir_3d + '/' + files_3d[0]
+        return (symbol_lib, footprint, file_3d)
+
 if __name__ == "__main__":
+    print(extract_archive_mouser("test.zip"))
     shutil.copy("./destination_template.kicad_sym","./destination.kicad_sym")
     merge_symbol_libraries("destination.kicad_sym", "source_0.kicad_sym")
     merge_symbol_libraries("destination.kicad_sym", "source_1.kicad_sym")
