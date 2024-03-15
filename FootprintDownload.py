@@ -73,7 +73,7 @@ class FootprintDownload(pcbnew.ActionPlugin):
         if os.path.exists(symbol_lib_filename):
             wx.MessageBox(f"{symbol_lib_filename} already exists. Doing nothing")
         else: 
-            symbol_lib_template = """"(kicad_symbol_lib (version 20211014) (generator FootprintDownloader))"""
+            symbol_lib_template = """(kicad_symbol_lib (version 20211014) (generator FootprintDownloader))"""
             with open(symbol_lib_filename, "w") as f:
                 f.write(symbol_lib_template)
 
@@ -109,7 +109,11 @@ class FootprintDownload(pcbnew.ActionPlugin):
             time.sleep(1) # give 1s for the server to start before updating UI accordingly
             pcbnew.footprintdownload_server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             # update config before serving data
-            pcbnew.footprintdownload_server.config = self.config
+            # we want full path here not relative
+            pcbnew.footprintserver_config = {
+                "symbol_lib_filename": os.path.dirname(pcbnew.GetBoard().GetFileName()) + self.config['symbol_lib_filename'],
+                "footprint_lib_directory": os.path.dirname(pcbnew.GetBoard().GetFileName()) + self.config['footprint_lib_directory'],
+            }
             if is_server_running():
                 dialog.serverStatusLabel.SetLabel("Server is running")
                 dialog.startServerButton.Enable(False)

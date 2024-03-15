@@ -48,6 +48,7 @@ def list_to_sexp(data):
     return print_recursive([data])
 
 def merge_symbol_libraries(destination_filename, source_filename):
+    print(f"merging {source_filename} into {destination_filename}")
     with open(source_filename, "r") as source_file, open(destination_filename, "r+") as destination_file:
         source_data = source_file.read()
         source = sexp_to_list(source_data)
@@ -111,7 +112,15 @@ def extract_archive_mouser(zip_filename):
         return (symbol_lib, footprint, file_3d)
 
 if __name__ == "__main__":
-    print(extract_archive_mouser("test.zip"))
+    symbol_lib, footprint, model_3d = extract_archive_mouser("test.zip")
+    print(symbol_lib)
+    print(footprint)
+    print(model_3d)
     shutil.copy("./destination_template.kicad_sym","./destination.kicad_sym")
-    merge_symbol_libraries("destination.kicad_sym", "source_0.kicad_sym")
-    merge_symbol_libraries("destination.kicad_sym", "source_1.kicad_sym")
+    # merge_symbol_libraries("destination.kicad_sym", "source_0.kicad_sym")
+    # merge_symbol_libraries("destination.kicad_sym", "source_1.kicad_sym")
+
+    # actually merge the extracted libraries into destination
+    merge_symbol_libraries('./destination.kicad_sym', "/tmp/tmpajzh9p9n/TPS552872QWRYQRQ1/KiCad/TPS552872QWRYQRQ1.kicad_sym")
+    
+    
