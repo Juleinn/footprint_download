@@ -11,6 +11,7 @@ import shutil
 import tempfile
 import zipfile
 import os
+import IPython
 
 def parse_recursive(flat):
     ret = []
@@ -47,11 +48,24 @@ def print_recursive(arr):
 def list_to_sexp(data):
     return print_recursive([data])
 
+def update_footprint_field(symbol_sexp_data):
+    # assume standard file layout ( this might break )
+    for item in symbol_sexp_data:
+        if item[0] == "symbol":
+            for prop in item:
+                if len(prop) >= 3 and prop[0] == "property" and prop[1] == '"Footprint"':
+                    # TODO improve this. make footprint library configurable and 
+                    # make sure footprint/symbol names are matching
+                    footprint = prop[2].replace('"', '')
+                    prop[2] = f'"footprint_download:{footprint}"'
+    return symbol_sexp_data
+
 def merge_symbol_libraries(destination_filename, source_filename):
     print(f"merging {source_filename} into {destination_filename}")
     with open(source_filename, "r") as source_file, open(destination_filename, "r+") as destination_file:
         source_data = source_file.read()
         source = sexp_to_list(source_data)
+        source = update_footprint_field(source)
         destination_data = destination_file.read()
         destination = sexp_to_list(destination_data)
 
@@ -122,5 +136,12 @@ if __name__ == "__main__":
 
     # actually merge the extracted libraries into destination
     merge_symbol_libraries('./destination.kicad_sym', "/tmp/tmpajzh9p9n/TPS552872QWRYQRQ1/KiCad/TPS552872QWRYQRQ1.kicad_sym")
-    
-    
+    with open("/tmp/tmpajzh9p9n/TPS552872QWRYQRQ1/KiCad/TPS552872QWRYQRQ1.kicad_sym", 'r') as source_file:
+        source_data = source_file.read()
+        source = sexp_to_list(source_data)
+        update_footprint_field(source)
+
+        with open('/tmp/modified.kicad_sym', 'w') as modified:
+            modified.write(list_to_sexp(source))
+        
+     
