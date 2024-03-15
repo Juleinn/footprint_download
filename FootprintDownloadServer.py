@@ -59,6 +59,9 @@ class FootprintDownloadServer(BaseHTTPRequestHandler):
                 # merge in place, no copy, yolo (also projects are meant to be version controlled for catastrophic failure)
                 merge_symbol_libraries(self.config["symbol_lib_filename"], symbol_lib)
                 # need to copy footprint file over and 3D file too maybe
+                shutil.copy(footprint, self.config["footprint_lib_directory"])
+                if model_3d != "":
+                    shutil.copy(model_3d, self.config["footprint_lib_directory"])
 
 if __name__ == "__main__":        
     webServer = HTTPServer((hostName, serverPort), FootprintDownloadServer)
