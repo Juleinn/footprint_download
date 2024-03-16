@@ -51,17 +51,18 @@ class FootprintDownloadServer(BaseHTTPRequestHandler):
 
         # check which extraction to use 
         if "tab_url" in data.keys(): 
-            if "mouser" in data["tab_url"]:
-                # extract mouser archive
-                # give some time for download to complete first
-                time.sleep(1)
-                symbol_lib, footprint, model_3d = extract_archive(data["filename"])
-                # merge in place, no copy, yolo (also projects are meant to be version controlled for catastrophic failure)
-                merge_symbol_libraries(self.config["symbol_lib_filename"], symbol_lib)
-                # need to copy footprint file over and 3D file too maybe
+            # extract mouser archive
+            # give some time for download to complete first
+            time.sleep(1)
+            symbol_lib, footprints, model_3d = extract_archive(data["filename"])
+            print(f"extracted {symbol_lib}, {footprints}, {model_3d} from archive")
+            # merge in place, no copy, yolo (also projects are meant to be version controlled for catastrophic failure)
+            merge_symbol_libraries(self.config["symbol_lib_filename"], symbol_lib)
+            # need to copy footprint file over and 3D file too maybe
+            for footprint in footprints:
                 shutil.copy(footprint, self.config["footprint_lib_directory"])
-                if model_3d != "":
-                    shutil.copy(model_3d, self.config["footprint_lib_directory"])
+            if model_3d != "":
+                shutil.copy(model_3d, self.config["footprint_lib_directory"])
 
 if __name__ == "__main__":        
     webServer = HTTPServer((hostName, serverPort), FootprintDownloadServer)

@@ -45,7 +45,7 @@ def sexp_to_list(data):
     data = data.split()
     return parse_recursive(data)
 
-def print_recursive(arr):
+def print_recursive(arr, offset):
     ret = ""
     while True:
         if len(arr) == 0:
@@ -53,13 +53,13 @@ def print_recursive(arr):
         item = arr.pop(0)
 
         if type(item) == list:
-            ret += "(" + print_recursive(item) + ") "
+            ret += offset * " " + "(" + print_recursive(item, offset + 1) + offset * " " + ")\n"
         else:
             # we should only have strings at this point
-            ret += item + " "
+            ret +=  item + " "
 
 def list_to_sexp(data):
-    return print_recursive([data])
+    return print_recursive([data], 0)
 
 def update_footprint_field(symbol_sexp_data):
     # assume standard file layout ( this might break )
@@ -102,18 +102,18 @@ def extract_archive(zip_filename):
         # walk the zip for .kicad_sym, .kicad_mod and .stp/.step/.wrl files
         files_list = zip_ref.namelist()
         symbol_lib_filename = ""
-        footprint_filename = ""
+        footprint_filenames = []
         model3d_filename = ""
         for filename in files_list:
             if ".kicad_sym" in filename:
                 symbol_lib_filename = filename
             if ".kicad_mod" in filename:
-                footprint_filename = filename
+                footprint_filenames.append(filename)
             if ".stp" in filename or ".step" in filename or ".wrl" in filename:
                 model3d_filename = filename
 
         # ignore archives containing only 3d models. Those would have to be added manually later
-        if symbol_lib_filename == "" and footprint_filename == "":
+        if symbol_lib_filename == "" and len(footprint_filenames) == 0:
             print("Not a KiCAD archive. not unpacking")
             return None
         
@@ -121,13 +121,15 @@ def extract_archive(zip_filename):
         if symbol_lib_filename != "":
             zip_ref.extract(symbol_lib_filename, temp_dir)
             symbol_lib_filename = f"{temp_dir}/{symbol_lib_filename}"
-        if footprint_filename != "":
-            zip_ref.extract(footprint_filename, temp_dir)
-            footprint_filename = f"{temp_dir}/{footprint_filename}"
+        if len(footprint_filenames) != 0:
+            for i in range(len(footprint_filenames)):
+                footprint_filename = footprint_filenames[i]
+                zip_ref.extract(footprint_filename, temp_dir)
+                footprint_filenames[i] = f"{temp_dir}/{footprint_filename}"
         if model3d_filename != "":
             zip_ref.extract(model3d_filename, temp_dir)
             model3d_filename = f"{temp_dir}/{model3d_filename}"
         
         # return absolute path to extracted files 
-        return (symbol_lib_filename, footprint_filename, model3d_filename)
+        return (symbol_lib_filename, footprint_filenames, model3d_filename)
 

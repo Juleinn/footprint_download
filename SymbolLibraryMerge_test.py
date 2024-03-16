@@ -15,7 +15,8 @@ class TestSymbolLibraryMerge(unittest.TestCase):
     def test_extract_archive(self):
         files_list = extract_archive('./test_data/archive-demo.zip')
         self.assertNotEqual(files_list[0], "")
-        self.assertNotEqual(files_list[1], "")
+        self.assertNotEqual(files_list[1], [])
+        self.assertEqual(len(files_list[1]), 1)
 
     def test_merge_symbol_libraries(self):
         shutil.copy("./test_data/destination_template.kicad_sym","./test_data/destination.kicad_sym")
