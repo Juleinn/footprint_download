@@ -139,38 +139,40 @@ def extract_archive(zip_filename):
         return None
 
     temp_dir = tempfile.mkdtemp()
-    with zipfile.ZipFile(zip_filename) as zip_ref:
-        # walk the zip for .kicad_sym, .kicad_mod and .stp/.step/.wrl files
-        files_list = zip_ref.namelist()
-        symbol_lib_filename = ""
-        footprint_filenames = []
-        model3d_filename = ""
-        for filename in files_list:
-            if ".kicad_sym" in filename:
-                symbol_lib_filename = filename
-            if ".kicad_mod" in filename:
-                footprint_filenames.append(filename)
-            if ".stp" in filename or ".step" in filename or ".wrl" in filename:
-                model3d_filename = filename
+    try: 
+        with zipfile.ZipFile(zip_filename) as zip_ref:
+            # walk the zip for .kicad_sym, .kicad_mod and .stp/.step/.wrl files
+            files_list = zip_ref.namelist()
+            symbol_lib_filename = ""
+            footprint_filenames = []
+            model3d_filename = ""
+            for filename in files_list:
+                if ".kicad_sym" in filename:
+                    symbol_lib_filename = filename
+                if ".kicad_mod" in filename:
+                    footprint_filenames.append(filename)
+                if ".stp" in filename or ".step" in filename or ".wrl" in filename:
+                    model3d_filename = filename
 
-        # ignore archives containing only 3d models. Those would have to be added manually later
-        if symbol_lib_filename == "" and len(footprint_filenames) == 0:
-            print("Not a KiCAD archive. not unpacking")
-            return None
-        
-        # only extract the required files
-        if symbol_lib_filename != "":
-            zip_ref.extract(symbol_lib_filename, temp_dir)
-            symbol_lib_filename = f"{temp_dir}/{symbol_lib_filename}"
-        if len(footprint_filenames) != 0:
-            for i in range(len(footprint_filenames)):
-                footprint_filename = footprint_filenames[i]
-                zip_ref.extract(footprint_filename, temp_dir)
-                footprint_filenames[i] = f"{temp_dir}/{footprint_filename}"
-        if model3d_filename != "":
-            zip_ref.extract(model3d_filename, temp_dir)
-            model3d_filename = f"{temp_dir}/{model3d_filename}"
-        
-        # return absolute path to extracted files 
-        return (symbol_lib_filename, footprint_filenames, model3d_filename)
-
+            # ignore archives containing only 3d models. Those would have to be added manually later
+            if symbol_lib_filename == "" and len(footprint_filenames) == 0:
+                print("Not a KiCAD archive. not unpacking")
+                return None
+            
+            # only extract the required files
+            if symbol_lib_filename != "":
+                zip_ref.extract(symbol_lib_filename, temp_dir)
+                symbol_lib_filename = f"{temp_dir}/{symbol_lib_filename}"
+            if len(footprint_filenames) != 0:
+                for i in range(len(footprint_filenames)):
+                    footprint_filename = footprint_filenames[i]
+                    zip_ref.extract(footprint_filename, temp_dir)
+                    footprint_filenames[i] = f"{temp_dir}/{footprint_filename}"
+            if model3d_filename != "":
+                zip_ref.extract(model3d_filename, temp_dir)
+                model3d_filename = f"{temp_dir}/{model3d_filename}"
+            
+            # return absolute path to extracted files 
+            return (symbol_lib_filename, footprint_filenames, model3d_filename)
+    except zipfile.BadZipFile:
+        return None

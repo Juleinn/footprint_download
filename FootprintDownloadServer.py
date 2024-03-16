@@ -22,9 +22,6 @@ class FootprintDownloadServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes("</body></html>", "utf-8"))
 
     def do_POST(self):
-        self.send_response(200)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.end_headers()
 
         length = int(self.headers.get("Content-Length"))
         data = self.rfile.read(length)
@@ -54,10 +51,27 @@ class FootprintDownloadServer(BaseHTTPRequestHandler):
             # extract mouser archive
             # give some time for download to complete first
             time.sleep(1)
-            symbol_lib, footprints, model_3d = extract_archive(data["filename"])
+            filenames = extract_archive(data["filename"])
+            if filenames == None:
+                self.send_response(400)
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(bytes("No files could be extracted from archive", "utf-8"))
+                return
+                
+            symbol_lib, footprints, model_3d = (filenames)
+
             print(f"extracted {symbol_lib}, {footprints}, {model_3d} from archive")
-            # merge in place, no copy, yolo (also projects are meant to be version controlled for catastrophic failure)
-            merge_symbol_libraries(self.config["symbol_lib_filename"], symbol_lib)
+            try:
+                # merge in place, no copy, yolo (also projects are meant to be version controlled for catastrophic failure)
+                merge_symbol_libraries(self.config["symbol_lib_filename"], symbol_lib)
+            except:
+                self.send_response(400)
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(bytes("Could not merge footprint/symbol into libraries", "utf-8"))
+                return
+
             # need to copy footprint file over and 3D file too maybe
             for footprint in footprints:
                 if model_3d != "":
@@ -66,6 +80,10 @@ class FootprintDownloadServer(BaseHTTPRequestHandler):
                 shutil.copy(footprint, self.config["footprint_lib_directory"])
             if model_3d != "":
                 shutil.copy(model_3d, self.config["footprint_lib_directory"])
+
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
 
 if __name__ == "__main__":        
     webServer = HTTPServer((hostName, serverPort), FootprintDownloadServer)

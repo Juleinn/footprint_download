@@ -11,7 +11,7 @@ chrome.downloads.onChanged.addListener((download_delta) => {
 
             console.log({tab});
             if(tab.url === null && tab.url === undefined) {
-                alert('Failed to retrieve hostname from download tab');
+                alert('footprintdownload : Failed to retrieve hostname from download tab');
                 return;
             }
 
@@ -27,16 +27,18 @@ chrome.downloads.onChanged.addListener((download_delta) => {
                 }
             })
                 .then((response)=>{
-                    if( response.status === 200 ){
-                        chrome.tabs.sendMessage(tab.id, 'Success. Reload eeschema/symbol library to access new symbol and footprint');
-                    } else {
-                        console.log(response.body);
-                        chrome.tabs.sendMessage(tab.id, `Failed: ${response.body}`);
-                    }
+                    console.log({response});
+                    response.text().then((text)=>{
+                        if( response.status === 200 ){
+                            chrome.tabs.sendMessage(tab.id, 'footprintdownload : Success. Reload eeschema/symbol library to access new symbol and footprint');
+                        } else {
+                            chrome.tabs.sendMessage(tab.id, `footprintdownload : Failed: ${text}`);
+                        }
+                    })
                 }) 
                 .catch((err)=>{
                     console.log({err})
-                    chrome.tabs.sendMessage(tab.id, 'Error while sending filename to server. Is server started ?');
+                    chrome.tabs.sendMessage(tab.id, 'footprintdownload : Error while sending filename to server. Is server started ?');
                 })
         });
 
