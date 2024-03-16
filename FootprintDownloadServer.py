@@ -60,6 +60,9 @@ class FootprintDownloadServer(BaseHTTPRequestHandler):
             merge_symbol_libraries(self.config["symbol_lib_filename"], symbol_lib)
             # need to copy footprint file over and 3D file too maybe
             for footprint in footprints:
+                if model_3d != "":
+                    print("Updating 3d model in place")
+                    update_3dmodel_inplace(footprint, model_3d)
                 shutil.copy(footprint, self.config["footprint_lib_directory"])
             if model_3d != "":
                 shutil.copy(model_3d, self.config["footprint_lib_directory"])

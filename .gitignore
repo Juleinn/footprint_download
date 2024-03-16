@@ -1,3 +1,4 @@
 __pycache__/
 destination.kicad_sym
 *zip
+test_data/footprint-model.kicad_mod

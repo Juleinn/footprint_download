@@ -61,6 +61,41 @@ def print_recursive(arr, offset):
 def list_to_sexp(data):
     return print_recursive([data], 0)
 
+def has_3dmodel(footprint_sexp_data):
+    for item in footprint_sexp_data:
+        if item[0] == "model":
+            return True 
+    return False
+
+def update_3dmodel(footprint_sexp_data, model3d_filename):
+    model_sexp = f"""
+(model {model3d_filename}
+(at (xyz 0 0 0))
+(scale (xyz 1 1 1))
+(rotate (xyz 0 0 0))
+)
+    """
+    model_data = sexp_to_list(model_sexp)
+    # insert at base level 
+    footprint_sexp_data.append(model_data)
+    return footprint_sexp_data
+
+def update_3dmodel_inplace(footprint_filename, model3d_filename):
+    with open(footprint_filename, 'r+') as footprint_file: 
+        footprint_sexp = footprint_file.read()
+        footprint_data = sexp_to_list(footprint_sexp)
+
+        if has_3dmodel(footprint_data):
+            print("Footprint file has 3d model registered. Doing nothing")
+            return
+        else:
+            model3d_filename = os.path.basename(model3d_filename)
+            footprint_data = update_3dmodel(footprint_data, model3d_filename)
+
+        footprint_file.seek(0)
+        footprint_file.write(list_to_sexp(footprint_data))
+        footprint_file.truncate()
+
 def update_footprint_field(symbol_sexp_data):
     # assume standard file layout ( this might break )
     for item in symbol_sexp_data:
@@ -69,8 +104,14 @@ def update_footprint_field(symbol_sexp_data):
                 if len(prop) >= 3 and prop[0] == "property" and prop[1] == '"Footprint"':
                     # TODO improve this. make footprint library configurable and 
                     # make sure footprint/symbol names are matching
-                    footprint = prop[2].replace('"', '')
+
+                    # we may have either 0 or 1 ':' separating library from the footprint
+                    if prop[2].count(':') == 1:
+                        footprint = prop[2].replace('"', '').split(':')[1]
+                    else:
+                        footprint = prop[2].replace('"', '')
                     prop[2] = f'"footprint_download:{footprint}"'
+
     return symbol_sexp_data
 
 def merge_symbol_libraries(destination_filename, source_filename):
