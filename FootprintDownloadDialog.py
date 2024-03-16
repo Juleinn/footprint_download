@@ -23,10 +23,12 @@ class FootprintDownloadDialogFrame ( wx.Dialog ):
 
 		bSizer1 = wx.BoxSizer( wx.VERTICAL )
 
+		bSizer10 = wx.BoxSizer( wx.VERTICAL )
+
 		self.serverStatusLabel = wx.StaticText( self, wx.ID_ANY, u"Server Status", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.serverStatusLabel.Wrap( -1 )
 
-		bSizer1.Add( self.serverStatusLabel, 0, wx.ALL, 5 )
+		bSizer10.Add( self.serverStatusLabel, 0, wx.ALL, 5 )
 
 		bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
 
@@ -37,10 +39,7 @@ class FootprintDownloadDialogFrame ( wx.Dialog ):
 		bSizer2.Add( self.stopServerbutton, 0, wx.ALL, 5 )
 
 
-		bSizer1.Add( bSizer2, 0, wx.EXPAND, 5 )
-
-		self.m_staticline1 = wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
-		bSizer1.Add( self.m_staticline1, 0, wx.EXPAND |wx.ALL, 5 )
+		bSizer10.Add( bSizer2, 0, wx.EXPAND, 5 )
 
 		bSizer21 = wx.BoxSizer( wx.HORIZONTAL )
 
@@ -56,7 +55,7 @@ class FootprintDownloadDialogFrame ( wx.Dialog ):
 		bSizer21.Add( self.chooseSymbolLibraryButton, 0, wx.ALL, 5 )
 
 
-		bSizer1.Add( bSizer21, 0, wx.EXPAND, 5 )
+		bSizer10.Add( bSizer21, 0, wx.EXPAND, 5 )
 
 		bSizer211 = wx.BoxSizer( wx.HORIZONTAL )
 
@@ -72,7 +71,7 @@ class FootprintDownloadDialogFrame ( wx.Dialog ):
 		bSizer211.Add( self.chooseFootprintLibraryButton, 0, wx.ALL, 5 )
 
 
-		bSizer1.Add( bSizer211, 0, wx.EXPAND, 5 )
+		bSizer10.Add( bSizer211, 0, wx.EXPAND, 5 )
 
 		bSizer2111 = wx.BoxSizer( wx.HORIZONTAL )
 
@@ -83,7 +82,26 @@ class FootprintDownloadDialogFrame ( wx.Dialog ):
 		bSizer2111.Add( self.saveConfigButton, 0, wx.ALL, 5 )
 
 
-		bSizer1.Add( bSizer2111, 0, wx.EXPAND, 5 )
+		bSizer10.Add( bSizer2111, 0, wx.EXPAND, 5 )
+
+		self.m_staticline1 = wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+		bSizer10.Add( self.m_staticline1, 0, wx.EXPAND |wx.ALL, 5 )
+
+
+		bSizer1.Add( bSizer10, 1, wx.EXPAND, 5 )
+
+		bSizer11 = wx.BoxSizer( wx.HORIZONTAL )
+
+		self.m_staticText6 = wx.StaticText( self, wx.ID_ANY, u"Server will run when window is closed", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText6.Wrap( -1 )
+
+		bSizer11.Add( self.m_staticText6, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+		self.closeButton = wx.Button( self, wx.ID_CANCEL, u"Close", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer11.Add( self.closeButton, 0, wx.ALIGN_RIGHT|wx.ALL, 5 )
+
+
+		bSizer1.Add( bSizer11, 0, wx.ALIGN_RIGHT, 5 )
 
 
 		self.SetSizer( bSizer1 )
