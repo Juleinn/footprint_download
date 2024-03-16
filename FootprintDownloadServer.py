@@ -55,7 +55,7 @@ class FootprintDownloadServer(BaseHTTPRequestHandler):
                 # extract mouser archive
                 # give some time for download to complete first
                 time.sleep(1)
-                symbol_lib, footprint, model_3d = extract_archive_mouser(data["filename"])
+                symbol_lib, footprint, model_3d = extract_archive(data["filename"])
                 # merge in place, no copy, yolo (also projects are meant to be version controlled for catastrophic failure)
                 merge_symbol_libraries(self.config["symbol_lib_filename"], symbol_lib)
                 # need to copy footprint file over and 3D file too maybe

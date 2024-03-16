@@ -79,69 +79,66 @@ def merge_symbol_libraries(destination_filename, source_filename):
         destination_file.write(destination_data)
         destination_file.truncate()
 
-# this will break at some point, when directory structure changes
-def extract_archive_mouser(zip_filename):
+def extract_archive(zip_filename):
+    #check file exists and is less than 10MB
+    if not os.path.exists(zip_filename) or not os.path.getsize(zip_filename) < 10e6: 
+        print("Archive does not exist or is too large")
+        return None
+
     temp_dir = tempfile.mkdtemp()
-    with zipfile.ZipFile(zip_filename, 'r') as zip_ref:
-        zip_ref.extractall(temp_dir)
-        # find out the folders
-        directories = next(os.walk(temp_dir))[1]
-        if len(directories) != 1:
-            print("Incorrect archive format")
-            return None
-        
-        device_subdir = temp_dir + "/" + directories[0]
-        # walk the subdir, we should have KiCad subdir and optionnaly 3D
-        cads_subdirs = next(os.walk(device_subdir))[1]
-        # find Kicad files
-        if not "KiCad" in cads_subdirs:
-            print("Kicad not found")
-            return None
-        
-        kicad_subdir = device_subdir + "/KiCad"
-        # looking for a .kicad_sym file
-        kicad_files = next(os.walk(kicad_subdir))[2]
-        symbol_libs = list(filter(lambda x: ".kicad_sym" in x, kicad_files))
-        footprints = list(filter(lambda x: ".kicad_mod" in x, kicad_files))
+    with zipfile.ZipFile(zip_filename) as zip_ref:
+        # walk the zip for .kicad_sym, .kicad_mod and .stp/.step/.wrl files
+        files_list = zip_ref.namelist()
+        symbol_lib_filename = ""
+        footprint_filename = ""
+        model3d_filename = ""
+        for filename in files_list:
+            if ".kicad_sym" in filename:
+                symbol_lib_filename = filename
+            if ".kicad_mod" in filename:
+                footprint_filename = filename
+            if ".stp" in filename or ".step" in filename or ".wrl" in filename:
+                model3d_filename = filename
 
-        if len(symbol_libs) != 1 or len(footprints) != 1:
-            print("Multiple symbol/footprints libs found. Cannot choose.")
+        # ignore archives containing only 3d models. Those would have to be added manually later
+        if symbol_lib_filename == "" and footprint_filename == "":
+            print("Not a KiCAD archive. not unpacking")
             return None
         
-        symbol_lib = kicad_subdir + '/' + symbol_libs[0]
-        footprint = kicad_subdir + '/' + footprints[0]
-
-        if not "3D" in cads_subdirs:
-            print("No 3D file found. Returning symbol/footprint")
-            return (symbol_lib, footprint, "")
+        # only extract the required files
+        if symbol_lib_filename != "":
+            zip_ref.extract(symbol_lib_filename, temp_dir)
+            symbol_lib_filename = f"{temp_dir}/{symbol_lib_filename}"
+        if footprint_filename != "":
+            zip_ref.extract(footprint_filename, temp_dir)
+            footprint_filename = f"{temp_dir}/{footprint_filename}"
+        if model3d_filename != "":
+            zip_ref.extract(model3d_filename, temp_dir)
+            model3d_filename = f"{temp_dir}/{model3d_filename}"
         
-        subdir_3d = device_subdir + '/3D'  
-        files_3d = next(os.walk(subdir_3d))[2]
-        if len(files_3d) == 0:
-            print("No 3D file found. Returning symbol/footprint")
-            return (symbol_lib, footprint, "")
-        
-        # TODO manage multi format here, wrl preferred over stp
-        file_3d = subdir_3d + '/' + files_3d[0]
-        return (symbol_lib, footprint, file_3d)
+        # return absolute path to extracted files 
+        return (symbol_lib_filename, footprint_filename, model3d_filename)
 
 if __name__ == "__main__":
-    symbol_lib, footprint, model_3d = extract_archive_mouser("test.zip")
-    print(symbol_lib)
-    print(footprint)
-    print(model_3d)
-    shutil.copy("./destination_template.kicad_sym","./destination.kicad_sym")
+    pass
+    # files = extract_archive('/tmp/LIB_TPS552872QWRYQRQ1.zip')
+    # print(files)
+    #symbol_lib, footprint, model_3d = extract_archive_mouser("test.zip")
+    #print(symbol_lib)
+    #print(footprint)
+    #print(model_3d)
+    #shutil.copy("./destination_template.kicad_sym","./destination.kicad_sym")
     # merge_symbol_libraries("destination.kicad_sym", "source_0.kicad_sym")
     # merge_symbol_libraries("destination.kicad_sym", "source_1.kicad_sym")
 
     # actually merge the extracted libraries into destination
-    merge_symbol_libraries('./destination.kicad_sym', "/tmp/tmpajzh9p9n/TPS552872QWRYQRQ1/KiCad/TPS552872QWRYQRQ1.kicad_sym")
-    with open("/tmp/tmpajzh9p9n/TPS552872QWRYQRQ1/KiCad/TPS552872QWRYQRQ1.kicad_sym", 'r') as source_file:
-        source_data = source_file.read()
-        source = sexp_to_list(source_data)
-        update_footprint_field(source)
+    #merge_symbol_libraries('./destination.kicad_sym', "/tmp/tmpajzh9p9n/TPS552872QWRYQRQ1/KiCad/TPS552872QWRYQRQ1.kicad_sym")
+    #with open("/tmp/tmpajzh9p9n/TPS552872QWRYQRQ1/KiCad/TPS552872QWRYQRQ1.kicad_sym", 'r') as source_file:
+    #    source_data = source_file.read()
+    #    source = sexp_to_list(source_data)
+    #    update_footprint_field(source)
 
-        with open('/tmp/modified.kicad_sym', 'w') as modified:
-            modified.write(list_to_sexp(source))
-        
+    #    with open('/tmp/modified.kicad_sym', 'w') as modified:
+    #        modified.write(list_to_sexp(source))
+    #    
      
