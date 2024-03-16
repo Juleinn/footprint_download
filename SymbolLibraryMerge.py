@@ -28,7 +28,20 @@ def parse_recursive(flat):
             ret.append(item)
 
 def sexp_to_list(data):
-    data = data.replace("(", " ( ").replace(")", " ) ")
+    # replace '(' with ' ( ' for whitespace splitting 
+    # being carefull to leave quoted parentheses alone
+    # first split around quotes 
+    splits = data.split('"')
+    for i in range(len(splits)):
+        # quoted items are odd
+        if i % 2 == 0:
+            splits[i] = splits[i].replace("(", " ( ").replace(")", " ) ")
+        else:
+            # put the quotes back in (split removed them)
+            splits[i] = f'"{splits[i]}"'
+
+    data = "".join(splits)
+    # whitespace split
     data = data.split()
     return parse_recursive(data)
 
@@ -61,7 +74,6 @@ def update_footprint_field(symbol_sexp_data):
     return symbol_sexp_data
 
 def merge_symbol_libraries(destination_filename, source_filename):
-    print(f"merging {source_filename} into {destination_filename}")
     with open(source_filename, "r") as source_file, open(destination_filename, "r+") as destination_file:
         source_data = source_file.read()
         source = sexp_to_list(source_data)
@@ -119,26 +131,3 @@ def extract_archive(zip_filename):
         # return absolute path to extracted files 
         return (symbol_lib_filename, footprint_filename, model3d_filename)
 
-if __name__ == "__main__":
-    pass
-    # files = extract_archive('/tmp/LIB_TPS552872QWRYQRQ1.zip')
-    # print(files)
-    #symbol_lib, footprint, model_3d = extract_archive_mouser("test.zip")
-    #print(symbol_lib)
-    #print(footprint)
-    #print(model_3d)
-    #shutil.copy("./destination_template.kicad_sym","./destination.kicad_sym")
-    # merge_symbol_libraries("destination.kicad_sym", "source_0.kicad_sym")
-    # merge_symbol_libraries("destination.kicad_sym", "source_1.kicad_sym")
-
-    # actually merge the extracted libraries into destination
-    #merge_symbol_libraries('./destination.kicad_sym', "/tmp/tmpajzh9p9n/TPS552872QWRYQRQ1/KiCad/TPS552872QWRYQRQ1.kicad_sym")
-    #with open("/tmp/tmpajzh9p9n/TPS552872QWRYQRQ1/KiCad/TPS552872QWRYQRQ1.kicad_sym", 'r') as source_file:
-    #    source_data = source_file.read()
-    #    source = sexp_to_list(source_data)
-    #    update_footprint_field(source)
-
-    #    with open('/tmp/modified.kicad_sym', 'w') as modified:
-    #        modified.write(list_to_sexp(source))
-    #    
-     
