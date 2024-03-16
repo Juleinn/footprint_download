@@ -4,4 +4,8 @@
  "background": {"scripts": ["bg.js"], "persistent": false},
  "options_page": "options.html",
  "permissions": ["downloads", "tabs"],
+"content_scripts": [{
+"matches": ["*://*/*"],
+"js": ["inject.js"]
+  }],
  "manifest_version": 2}
