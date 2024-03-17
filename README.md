@@ -132,6 +132,7 @@ Archives are considered if :
 ![mouser](images/mouser.png)
 
 After downloading the file, the extension should give you a hint of wether it worked or not 
+
 ![success](images/success.png)
 ![failed](images/failed.png)
 ![not started](images/not_started.png)
@@ -147,6 +148,7 @@ The footprints have also been added :
 ![new footprint](images/new_footprint.png)
 
 The 3d file should also be there
+
 ![footprint properties](images/footprint_properties.png)
 
 ## known issues 
