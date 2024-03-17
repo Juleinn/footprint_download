@@ -17,7 +17,6 @@ chrome.downloads.onChanged.addListener((download_delta) => {
 
             let body =  JSON.stringify({
                 filename: current_filename,
-                tab_url: tab.url,
             })
             fetch("http://localhost:2222", {
                 method: "POST",

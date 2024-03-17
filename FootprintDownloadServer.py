@@ -41,45 +41,43 @@ class FootprintDownloadServer(BaseHTTPRequestHandler):
         self.config = getattr(pcbnew, "footprintserver_config")
         print(self.config)
         
-        if not "tab_url" in data.keys() or not "filename" in data.keys():
+        if not "filename" in data.keys():
             self.send_response(400)
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
 
-        # check which extraction to use 
-        if "tab_url" in data.keys(): 
-            # extract mouser archive
-            # give some time for download to complete first
-            time.sleep(1)
-            filenames = extract_archive(data["filename"])
-            if filenames == None:
-                self.send_response(400)
-                self.send_header("Access-Control-Allow-Origin", "*")
-                self.end_headers()
-                self.wfile.write(bytes("No files could be extracted from archive", "utf-8"))
-                return
-                
-            symbol_lib, footprints, model_3d = (filenames)
+        # extract mouser archive
+        # give some time for download to complete first
+        time.sleep(1)
+        filenames = extract_archive(data["filename"])
+        if filenames == None:
+            self.send_response(400)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(bytes("No files could be extracted from archive", "utf-8"))
+            return
+            
+        symbol_lib, footprints, model_3d = (filenames)
 
-            print(f"extracted {symbol_lib}, {footprints}, {model_3d} from archive")
-            try:
-                # merge in place, no copy, yolo (also projects are meant to be version controlled for catastrophic failure)
-                merge_symbol_libraries(self.config["symbol_lib_filename"], symbol_lib)
-            except:
-                self.send_response(400)
-                self.send_header("Access-Control-Allow-Origin", "*")
-                self.end_headers()
-                self.wfile.write(bytes("Could not merge footprint/symbol into libraries", "utf-8"))
-                return
+        print(f"extracted {symbol_lib}, {footprints}, {model_3d} from archive")
+        try:
+            # merge in place, no copy, yolo (also projects are meant to be version controlled for catastrophic failure)
+            merge_symbol_libraries(self.config["symbol_lib_filename"], symbol_lib)
+        except:
+            self.send_response(400)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(bytes("Could not merge footprint/symbol into libraries", "utf-8"))
+            return
 
-            # need to copy footprint file over and 3D file too maybe
-            for footprint in footprints:
-                if model_3d != "":
-                    print("Updating 3d model in place")
-                    update_3dmodel_inplace(footprint, model_3d)
-                shutil.copy(footprint, self.config["footprint_lib_directory"])
+        # need to copy footprint file over and 3D file too maybe
+        for footprint in footprints:
             if model_3d != "":
-                shutil.copy(model_3d, self.config["footprint_lib_directory"])
+                print("Updating 3d model in place")
+                update_3dmodel_inplace(footprint, model_3d)
+            shutil.copy(footprint, self.config["footprint_lib_directory"])
+        if model_3d != "":
+            shutil.copy(model_3d, self.config["footprint_lib_directory"])
 
         self.send_response(200)
         self.send_header("Access-Control-Allow-Origin", "*")
