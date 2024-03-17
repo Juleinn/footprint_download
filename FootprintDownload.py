@@ -43,7 +43,7 @@ class FootprintDownload(pcbnew.ActionPlugin):
         self.name = "footprint_download"
         self.category = "import"
         self.show_toolbar_button = "true"
-        self.icon_file_name = os.path.join(os.path.dirname(__file__), 'icon.png')
+        self.icon_file_name = os.path.join(os.path.dirname(__file__), 'logo.png')
         self.description = "A tool for downloading footprints and symbols from distributor sites"
 
     def read_config(self):

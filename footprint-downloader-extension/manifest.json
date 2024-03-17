@@ -4,6 +4,7 @@
  "background": {"scripts": ["bg.js"], "persistent": false},
  "options_page": "options.html",
  "permissions": ["downloads", "tabs"],
+"icons":{"32":"icon.png"},
 "content_scripts": [{
 "matches": ["*://*/*"],
 "js": ["inject.js"]
