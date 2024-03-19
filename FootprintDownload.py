@@ -1,4 +1,3 @@
-import IPython
 import json
 import socket
 import pcbnew
@@ -90,7 +89,6 @@ class FootprintDownload(pcbnew.ActionPlugin):
         dialog = FootprintDownloadDialog(None)
 
         self.read_config()
-        #IPython.embed(colors="neutral")
         dialog.symbolLibraryTextbox.SetValue(self.config["symbol_lib_filename"])
         dialog.footprintLibraryTextbox.SetValue(self.config["footprint_lib_directory"])
 

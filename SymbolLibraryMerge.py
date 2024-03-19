@@ -11,7 +11,6 @@ import shutil
 import tempfile
 import zipfile
 import os
-import IPython
 
 def parse_recursive(flat):
     ret = []
