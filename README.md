@@ -28,7 +28,7 @@ Install with git or without git (the archive)
 - into the directory :
 
 ```bash
-git clone https://gitlab.com/Juleinn/footprint_download
+git clone https://githut.com/Juleinn/footprint_download
 ```
 #### without git 
 - Open pcbnew
