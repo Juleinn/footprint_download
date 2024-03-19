@@ -5,8 +5,8 @@
  "permissions": ["downloads", "tabs",   "<all_urls>" ],
 "icons":{"32":"icon.png"},
 "content_scripts": [{
-    "all_frames":true,
-"matches": ["*://*/*", "<all_urls>"],
+    "all_frames":false,
+"matches": ["*://*/*"],
 "js": ["inject.js"]
   }],
  "manifest_version": 2}
