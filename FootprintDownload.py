@@ -12,6 +12,11 @@ from .FootprintDownloadServer import FootprintDownloadServer
 HOSTNAME = "localhost"
 PORT = 2222
 
+def silence_serverlogs(*args, **kwargs):
+    # HTTPServer logs get redirected and prompts a textbox window thats not 
+    # required
+    pass
+
 class FootprintDownloadDialog(FootprintDownloadDialogFrame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -98,6 +103,7 @@ class FootprintDownload(pcbnew.ActionPlugin):
                 return 
 
             pcbnew.footprintdownload_server = HTTPServer((HOSTNAME, PORT), FootprintDownloadServer)
+            pcbnew.footprintdownload_server.log_messages = silence_serverlogs
             def server_threadfunc():
                 print("server started")
                 pcbnew.footprintdownload_server.serve_forever()
